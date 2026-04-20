@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar Sesión — Residencial 7BIMOT</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #1a202c 100%);
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 44px 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+    }
+
+    .hotel-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .logo-circle {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #f6c90e, #f6ad55);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 20px rgba(246,201,14,0.4);
+    }
+
+    .hotel-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a202c;
+      letter-spacing: 1px;
+    }
+
+    .hotel-sub {
+      font-size: 13px;
+      color: #a0aec0;
+      margin-top: 5px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 15px;
+      color: #718096;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .alert {
+      background: #fff5f5;
+      border: 1.5px solid #fed7d7;
+      color: #c53030;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert.show { display: block; }
+
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #4a5568;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      color: #2d3748;
+    }
+
+    input:focus {
+      border-color: #f6c90e;
+      box-shadow: 0 0 0 3px rgba(246,201,14,0.15);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #f6c90e, #f6ad55);
+      color: #1a202c;
+      font-size: 16px;
+      font-weight: 800;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(246,201,14,0.35);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(246,201,14,0.45);
+    }
+
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .hint-box {
+      margin-top: 26px;
+      padding: 16px;
+      background: #fffde7;
+      border-radius: 12px;
+      border: 1.5px solid #f6c90e;
+    }
+
+    .hint-box h4 {
+      font-size: 11px;
+      color: #b7791f;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+    }
+
+    .cred-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: #4a5568;
+      padding: 6px 0;
+      border-bottom: 1px solid #fef3c7;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .cred-row:last-child { border-bottom: none; }
+    .cred-row:hover { background: #fef9c3; padding-left: 4px; }
+
+    .cred-row code {
+      font-family: 'Consolas', monospace;
+      font-size: 12px;
+      background: #fef3c7;
+      padding: 2px 7px;
+      border-radius: 6px;
+      color: #744210;
+    }
+
+    .role-badge {
+      background: #f6c90e;
+      color: #1a202c;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .role-badge.emp {
+      background: #bee3f8;
+      color: #2b6cb0;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 32px 24px 28px; margin: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="hotel-header">
+    <div class="logo-circle">&#127968;</div>
+    <div class="hotel-name">Residencial 7BIMOT</div>
+    <div class="hotel-sub">Sistema de Gestión &mdash; Loja, Ecuador</div>
+  </div>
+
+  <h2>Inicia sesión para continuar</h2>
+
+  <div class="alert" id="alerta"></div>
+
+  <form id="formLogin">
+    <div class="form-group">
+      <label for="usuario">Usuario</label>
+      <input type="text" id="usuario" placeholder="Tu nombre de usuario" autocomplete="username" required />
+    </div>
+    <div class="form-group">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="Tu contraseña" autocomplete="current-password" required />
+    </div>
+    <button type="submit" class="btn-submit" id="btnLogin">Iniciar Sesión</button>
+  </form>
+
+  <div class="hint-box">
+    <h4>Cuentas de acceso</h4>
+    <div class="cred-row" onclick="rellenar('admin','admin123')">
+      <span><code>admin</code> / <code>admin123</code></span>
+      <span class="role-badge">ADMIN</span>
+    </div>
+    <div class="cred-row" onclick="rellenar('empleado','emp123')">
+      <span><code>empleado</code> / <code>emp123</code></span>
+      <span class="role-badge emp">EMPLEADO</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (localStorage.getItem('token')) {
+    window.location.href = '/dashboard';
+  }
+
+  function rellenar(u, p) {
+    document.getElementById('usuario').value = u;
+    document.getElementById('password').value = p;
+  }
+
+  document.getElementById('formLogin').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn    = document.getElementById('btnLogin');
+    const alerta = document.getElementById('alerta');
+    alerta.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Iniciando sesión...';
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuario:  document.getElementById('usuario').value.trim(),
+          password: document.getElementById('password').value
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alerta.textContent = data.error || 'Error al iniciar sesión';
+        alerta.classList.add('show');
+        return;
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+      window.location.href = '/dashboard';
+    } catch {
+      alerta.textContent = 'No se pudo conectar al servidor. ¿Está corriendo Node.js?';
+      alerta.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Iniciar Sesión';
+    }
+  });
+</script>
+
+</body>
+</html>

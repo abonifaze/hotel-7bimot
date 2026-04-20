@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Residencial 7BIMOT LOJA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fffde7;
+      color: #2d3748;
+    }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      background: linear-gradient(135deg, #f6c90e, #f6ad55);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 62px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .nav-brand {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1a202c;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    .nav-tabs { display: flex; gap: 6px; }
+
+    .nav-tab {
+      padding: 7px 16px;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-radius: 8px;
+      background: transparent;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1a202c;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .nav-tab:hover   { background: rgba(255,255,255,0.4); }
+    .nav-tab.activo  { background: white; }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .user-nombre { font-weight: 700; font-size: 0.9rem; color: #1a202c; }
+
+    .role-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .role-badge.admin    { background: #1a202c; color: #f6c90e; }
+    .role-badge.empleado { background: white;   color: #b7791f; }
+
+    .btn-logout {
+      padding: 7px 14px;
+      background: rgba(0,0,0,0.15);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1a202c;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-logout:hover { background: rgba(0,0,0,0.25); }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 1140px;
+      margin: 28px auto;
+      padding: 0 20px;
+    }
+
+    /* ── STATS ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-top: 4px solid;
+    }
+
+    .stat-card.ingreso { border-color: #48bb78; }
+    .stat-card.salida  { border-color: #f56565; }
+    .stat-card.activo  { border-color: #4299e1; }
+
+    .stat-card .num { font-size: 2.2rem; font-weight: 700; margin-bottom: 4px; }
+    .stat-card.ingreso .num { color: #48bb78; }
+    .stat-card.salida  .num { color: #f56565; }
+    .stat-card.activo  .num { color: #4299e1; }
+    .stat-card .lbl { font-size: 0.85rem; color: #718096; font-weight: 600; }
+
+    /* ── FORM ── */
+    .form-card, .table-card, .users-card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
+
+    .form-card h2, .table-card h2, .users-card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 20px;
+      color: #b7791f;
+      border-bottom: 2px solid #fef3c7;
+      padding-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      transition: border-color 0.2s;
+      background: #f7fafc;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #f6c90e;
+      background: white;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 11px 26px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:hover  { opacity: 0.88; }
+    button:active { transform: scale(0.97); }
+
+    .btn-ingreso { background: #48bb78; color: white; }
+    .btn-salida  { background: #f56565; color: white; }
+    .btn-limpiar { background: #fef3c7; color: #b7791f; }
+    .btn-primary { background: #f6c90e; color: #1a202c; font-weight: 700; }
+    .btn-danger  { background: #f56565; color: white; }
+    .btn-sm { padding: 6px 14px; font-size: 0.82rem; }
+
+    /* ── TABLE ── */
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .filtros button {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      border-radius: 20px;
+      background: #fef3c7;
+      color: #b7791f;
+    }
+
+    .filtros button.activo-btn { background: #f6c90e; color: #1a202c; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+
+    thead th {
+      background: #fef3c7;
+      color: #b7791f;
+      font-weight: 700;
+      padding: 12px 14px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #fef9c3;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: #fffde7; }
+
+    tbody td {
+      padding: 11px 14px;
+      vertical-align: middle;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .tag-ingreso { background: #c6f6d5; color: #276749; }
+    .tag-salida  { background: #fed7d7; color: #9b2c2c; }
+
+    .empty-msg {
+      text-align: center;
+      color: #a0aec0;
+      padding: 40px;
+      font-size: 0.95rem;
+    }
+
+    .btn-del {
+      background: transparent;
+      color: #fc8181;
+      padding: 4px 10px;
+      font-size: 0.82rem;
+      border: 1px solid #fed7d7;
+      border-radius: 6px;
+    }
+
+    .btn-del:hover { background: #fff5f5; }
+
+    /* ── USER MANAGEMENT ── */
+    .user-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .users-table-wrap { overflow-x: auto; }
+
+    .badge-rol {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-admin    { background: #1a202c; color: #f6c90e; }
+    .badge-empleado { background: #bee3f8; color: #2b6cb0; }
+
+    .badge-activo   { background: #c6f6d5; color: #276749; }
+    .badge-inactivo { background: #fed7d7; color: #9b2c2c; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 340px;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok  { background: #48bb78; }
+    .toast.err { background: #f56565; }
+
+    /* ── LOADING ── */
+    .loading { opacity: 0.5; pointer-events: none; }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #a0aec0;
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 640px) {
+      .top-nav   { height: auto; padding: 12px 16px; }
+      .btn-row   { flex-direction: column; }
+      .nav-brand { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <span class="nav-brand">&#127968; Residencial 7BIMOT</span>
+  <div class="nav-tabs">
+    <button class="nav-tab activo" id="tabMovBtn" onclick="showTab('movimientos')">&#128203; Movimientos</button>
+    <button class="nav-tab" id="tabUsrBtn"  onclick="showTab('usuarios')" style="display:none">&#128100; Usuarios</button>
+  </div>
+  <div class="nav-user">
+    <span class="user-nombre" id="navNombre"></span>
+    <span class="role-badge" id="navRol"></span>
+    <button class="btn-logout" onclick="logout()">Salir &#10132;</button>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ═══════════ TAB: MOVIMIENTOS ═══════════ -->
+  <div id="secMovimientos">
+
+    <!-- ESTADÍSTICAS -->
+    <div class="stats">
+      <div class="stat-card ingreso">
+        <div class="num" id="totalIngresos">—</div>
+        <div class="lbl">&#x2714; Total Ingresos</div>
+      </div>
+      <div class="stat-card salida">
+        <div class="num" id="totalSalidas">—</div>
+        <div class="lbl">&#x2716; Total Salidas</div>
+      </div>
+      <div class="stat-card activo">
+        <div class="num" id="totalActivos">—</div>
+        <div class="lbl">&#127968; Huéspedes Activos</div>
+      </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="form-card">
+      <h2>&#128221; Registrar Movimiento</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre del Huésped *</label>
+          <input type="text" id="nombre" placeholder="Ej: Juan Pérez" />
+        </div>
+        <div class="form-group">
+          <label>N° Cédula / Pasaporte *</label>
+          <input type="text" id="cedula" placeholder="Ej: 1102345678" />
+        </div>
+        <div class="form-group">
+          <label>N° Habitación *</label>
+          <input type="text" id="habitacion" placeholder="Ej: 101" />
+        </div>
+        <div class="form-group">
+          <label>Fecha y Hora</label>
+          <input type="datetime-local" id="fechaHora" />
+        </div>
+        <div class="form-group">
+          <label>Tipo de Pago</label>
+          <select id="pago">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta</option>
+            <option value="Transferencia">Transferencia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Monto ($)</label>
+          <input type="number" id="monto" placeholder="0.00" min="0" step="0.01" />
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>Observaciones</label>
+          <input type="text" id="observacion" placeholder="Notas adicionales..." />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ingreso" onclick="registrar('Ingreso')">&#x2714; Registrar Ingreso</button>
+        <button class="btn-salida"  onclick="registrar('Salida')">&#x2716; Registrar Salida</button>
+        <button class="btn-limpiar" onclick="limpiarForm()">&#x21BA; Limpiar</button>
+      </div>
+    </div>
+
+    <!-- TABLA MOVIMIENTOS -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>&#128203; Registro de Movimientos</h2>
+        <div class="filtros">
+          <button id="btn-todos"   class="activo-btn" onclick="filtrar('todos')">Todos</button>
+          <button id="btn-Ingreso" onclick="filtrar('Ingreso')">Ingresos</button>
+          <button id="btn-Salida"  onclick="filtrar('Salida')">Salidas</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Nombre</th>
+              <th>Cédula/Pasaporte</th>
+              <th>Habitación</th>
+              <th>Fecha / Hora</th>
+              <th>Pago</th>
+              <th>Monto</th>
+              <th>Observación</th>
+              <th>Registrado por</th>
+              <th id="thAccion">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody">
+            <tr><td colspan="11" class="empty-msg">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /secMovimientos -->
+
+  <!-- ═══════════ TAB: USUARIOS (solo admin) ═══════════ -->
+  <div id="secUsuarios" style="display:none">
+
+    <!-- Formulario crear usuario -->
+    <div class="users-card">
+      <h2>&#43; Crear Nuevo Usuario</h2>
+      <div class="user-form-grid">
+        <div class="form-group">
+          <label>Nombre Completo *</label>
+          <input type="text" id="uNombre" placeholder="Ej: María López" />
+        </div>
+        <div class="form-group">
+          <label>Nombre de Usuario *</label>
+          <input type="text" id="uUsuario" placeholder="Ej: mlopez" />
+        </div>
+        <div class="form-group">
+          <label>Contraseña *</label>
+          <input type="password" id="uPassword" placeholder="Mínimo 4 caracteres" />
+        </div>
+        <div class="form-group">
+          <label>Rol *</label>
+          <select id="uRol">
+            <option value="empleado">Empleado</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="crearUsuario()">&#43; Crear Usuario</button>
+      </div>
+    </div>
+
+    <!-- Tabla usuarios -->
+    <div class="users-card">
+      <h2>&#128101; Lista de Usuarios</h2>
+      <div class="users-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Creado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="usuariosBody">
+            <tr><td colspan="7" class="empty-msg">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /secUsuarios -->
+
+</div>
+
+<footer>&copy; 2026 Residencial 7BIMOT &mdash; Loja, Ecuador</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ─── AUTH ─── */
+  const token   = localStorage.getItem('token');
+  const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
+
+  if (!token || !usuario) {
+    window.location.href = '/';
+  }
+
+  const esAdmin = usuario?.rol === 'admin';
+
+  /* ─── INIT NAV ─── */
+  document.getElementById('navNombre').textContent = usuario?.nombre || '';
+  const rolEl = document.getElementById('navRol');
+  rolEl.textContent = (usuario?.rol || '').toUpperCase();
+  rolEl.className   = 'role-badge ' + (esAdmin ? 'admin' : 'empleado');
+
+  if (esAdmin) {
+    document.getElementById('tabUsrBtn').style.display = 'inline-flex';
+  }
+
+  if (!esAdmin) {
+    document.getElementById('thAccion').style.display = 'none';
+  }
+
+  /* ─── HELPERS ─── */
+  function api(path, opts = {}) {
+    return fetch(path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(opts.headers || {})
+      }
+    });
+  }
+
+  function toast(msg, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className   = 'toast ' + tipo + ' show';
+    setTimeout(() => el.classList.remove('show'), 3200);
+  }
+
+  function esc(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatFecha(f) {
+    if (!f) return '—';
+    const d = new Date(f);
+    if (isNaN(d)) return f;
+    return d.toLocaleDateString('es-EC') + ' ' + d.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function setFechaActual() {
+    const now   = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('fechaHora').value = local;
+  }
+
+  /* ─── TABS ─── */
+  function showTab(tab) {
+    document.getElementById('secMovimientos').style.display = tab === 'movimientos' ? '' : 'none';
+    document.getElementById('secUsuarios').style.display    = tab === 'usuarios'    ? '' : 'none';
+    document.getElementById('tabMovBtn').classList.toggle('activo', tab === 'movimientos');
+    document.getElementById('tabUsrBtn').classList.toggle('activo', tab === 'usuarios');
+    if (tab === 'usuarios') cargarUsuarios();
+  }
+
+  /* ─── LOGOUT ─── */
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.href = '/';
+  }
+
+  /* ══════════ MOVIMIENTOS ══════════ */
+  let movimientos    = [];
+  let filtroActual   = 'todos';
+
+  async function cargarMovimientos() {
+    try {
+      const res = await api('/api/movimientos');
+      if (res.status === 401) { logout(); return; }
+      movimientos = await res.json();
+      renderTabla();
+    } catch {
+      toast('Error al cargar movimientos', 'err');
+    }
+  }
+
+  async function cargarStats() {
+    try {
+      const res  = await api('/api/movimientos/stats');
+      const data = await res.json();
+      document.getElementById('totalIngresos').textContent = data.total_ingresos;
+      document.getElementById('totalSalidas').textContent  = data.total_salidas;
+      document.getElementById('totalActivos').textContent  = data.activos;
+    } catch {
+      /* silencioso */
+    }
+  }
+
+  async function registrar(tipo) {
+    const nombre     = document.getElementById('nombre').value.trim();
+    const cedula     = document.getElementById('cedula').value.trim();
+    const habitacion = document.getElementById('habitacion').value.trim();
+    const fechaHora  = document.getElementById('fechaHora').value;
+    const pago       = document.getElementById('pago').value;
+    const monto      = parseFloat(document.getElementById('monto').value) || 0;
+    const observacion= document.getElementById('observacion').value.trim();
+
+    if (!nombre || !cedula || !habitacion) {
+      toast('Completa los campos: Nombre, Cédula y Habitación', 'err');
+      return;
+    }
+
+    try {
+      const res = await api('/api/movimientos', {
+        method: 'POST',
+        body: JSON.stringify({
+          tipo, nombre_huesped: nombre, cedula, habitacion,
+          fecha_hora: fechaHora || new Date().toISOString(),
+          tipo_pago: pago, monto, observaciones: observacion
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error al registrar', 'err'); return; }
+
+      toast(`${tipo} registrado correctamente ✓`);
+      movimientos.unshift(data);
+      renderTabla();
+      cargarStats();
+      limpiarForm();
+    } catch {
+      toast('Error de conexión con el servidor', 'err');
+    }
+  }
+
+  async function eliminar(id) {
+    if (!confirm('¿Eliminar este registro permanentemente?')) return;
+    try {
+      const res = await api('/api/movimientos/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error al eliminar', 'err'); return; }
+      toast('Registro eliminado');
+      movimientos = movimientos.filter(m => m.id !== id);
+      renderTabla();
+      cargarStats();
+    } catch {
+      toast('Error de conexión', 'err');
+    }
+  }
+
+  function filtrar(tipo) {
+    filtroActual = tipo;
+    document.querySelectorAll('.filtros button').forEach(b => b.classList.remove('activo-btn'));
+    document.getElementById('btn-' + tipo).classList.add('activo-btn');
+    renderTabla();
+  }
+
+  function renderTabla() {
+    const tbody = document.getElementById('tablaBody');
+    const datos = filtroActual === 'todos'
+      ? movimientos
+      : movimientos.filter(m => m.tipo === filtroActual);
+
+    if (datos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="11" class="empty-msg">No hay registros para mostrar.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = datos.map((m, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><span class="tag tag-${m.tipo.toLowerCase()}">${esc(m.tipo)}</span></td>
+        <td><strong>${esc(m.nombre_huesped)}</strong></td>
+        <td>${esc(m.cedula)}</td>
+        <td>${esc(m.habitacion)}</td>
+        <td>${formatFecha(m.fecha_hora)}</td>
+        <td>${esc(m.tipo_pago)}</td>
+        <td>$${parseFloat(m.monto || 0).toFixed(2)}</td>
+        <td>${esc(m.observaciones) || '—'}</td>
+        <td><small style="color:#718096">${esc(m.registrado_por) || '—'}</small></td>
+        ${esAdmin
+          ? `<td><button class="btn-del" onclick="eliminar(${m.id})">Eliminar</button></td>`
+          : '<td style="display:none"></td>'
+        }
+      </tr>
+    `).join('');
+  }
+
+  function limpiarForm() {
+    ['nombre','cedula','habitacion','monto','observacion'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('pago').value = 'Efectivo';
+    setFechaActual();
+  }
+
+  /* ══════════ USUARIOS (solo admin) ══════════ */
+  async function cargarUsuarios() {
+    try {
+      const res  = await api('/api/usuarios');
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error', 'err'); return; }
+      renderUsuarios(data);
+    } catch {
+      toast('Error al cargar usuarios', 'err');
+    }
+  }
+
+  function renderUsuarios(lista) {
+    const tbody = document.getElementById('usuariosBody');
+    if (!lista.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No hay usuarios.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = lista.map((u, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${esc(u.nombre)}</strong></td>
+        <td>${esc(u.usuario)}</td>
+        <td><span class="badge-rol badge-${u.rol}">${u.rol.toUpperCase()}</span></td>
+        <td><span class="badge-rol ${u.activo ? 'badge-activo' : 'badge-inactivo'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+        <td><small style="color:#718096">${formatFecha(u.created_at)}</small></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap">
+          ${u.id !== usuario.id
+            ? `<button class="btn-sm ${u.activo ? 'btn-limpiar' : 'btn-ingreso'}" onclick="toggleActivo(${u.id}, ${u.activo})">
+                ${u.activo ? 'Desactivar' : 'Activar'}
+               </button>
+               <button class="btn-sm btn-danger" onclick="eliminarUsuario(${u.id})">Eliminar</button>`
+            : '<small style="color:#a0aec0">Tu cuenta</small>'
+          }
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function crearUsuario() {
+    const nombre   = document.getElementById('uNombre').value.trim();
+    const usu      = document.getElementById('uUsuario').value.trim();
+    const password = document.getElementById('uPassword').value;
+    const rol      = document.getElementById('uRol').value;
+
+    if (!nombre || !usu || !password) {
+      toast('Completa todos los campos del formulario', 'err');
+      return;
+    }
+
+    try {
+      const res  = await api('/api/usuarios', {
+        method: 'POST',
+        body: JSON.stringify({ nombre, usuario: usu, password, rol })
+      });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error al crear', 'err'); return; }
+
+      toast(`Usuario "${usu}" creado correctamente`);
+      ['uNombre','uUsuario','uPassword'].forEach(id => { document.getElementById(id).value = ''; });
+      cargarUsuarios();
+    } catch {
+      toast('Error de conexión', 'err');
+    }
+  }
+
+  async function toggleActivo(id, activo) {
+    try {
+      const res  = await api('/api/usuarios/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({ activo: activo ? 0 : 1 })
+      });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error', 'err'); return; }
+      toast('Estado actualizado');
+      cargarUsuarios();
+    } catch {
+      toast('Error de conexión', 'err');
+    }
+  }
+
+  async function eliminarUsuario(id) {
+    if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
+    try {
+      const res  = await api('/api/usuarios/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) { toast(data.error || 'Error', 'err'); return; }
+      toast('Usuario eliminado');
+      cargarUsuarios();
+    } catch {
+      toast('Error de conexión', 'err');
+    }
+  }
+
+  /* ─── ARRANQUE ─── */
+  setFechaActual();
+  cargarMovimientos();
+  cargarStats();
+</script>
+
+</body>
+</html>

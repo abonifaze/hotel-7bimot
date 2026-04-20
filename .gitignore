@@ -1,0 +1,4 @@
+node_modules/
+database/hotel7bimot.db
+*.log
+.env
