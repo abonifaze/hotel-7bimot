@@ -481,7 +481,9 @@
         </div>
         <div class="form-group">
           <label>N° Habitación *</label>
-          <input type="text" id="habitacion" placeholder="Ej: 101" />
+          <select id="habitacion">
+            <option value="">— Seleccionar habitación —</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Fecha y Hora</label>
@@ -771,6 +773,7 @@
       const data = await res.json();
       movimientos = Array.isArray(data) ? data : [];
       renderTabla();
+      actualizarHabitaciones();
     } catch (err) {
       console.error('cargarMovimientos:', err);
     }
@@ -799,6 +802,11 @@
 
     if (!nombre || !cedula || !habitacion) {
       toast('Completa los campos: Nombre, Cédula y Habitación', 'err');
+      return;
+    }
+
+    if (tipo === 'Ingreso' && habitacionesOcupadas().has(habitacion)) {
+      toast(`La habitación ${habitacion} ya está ocupada`, 'err');
       return;
     }
 
@@ -892,6 +900,36 @@
     setFechaActual();
     document.getElementById('bannerSeleccion').classList.remove('show');
     document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
+  }
+
+  function habitacionesOcupadas() {
+    const porHab = {};
+    movimientos.forEach(m => {
+      const h = String(m.habitacion).trim();
+      if (!porHab[h] || new Date(m.fecha_hora) > new Date(porHab[h].fecha_hora)) {
+        porHab[h] = m;
+      }
+    });
+    return new Set(
+      Object.entries(porHab)
+        .filter(([, m]) => m.tipo === 'Ingreso')
+        .map(([h]) => h)
+    );
+  }
+
+  function actualizarHabitaciones() {
+    const ocupadas = habitacionesOcupadas();
+    const sel  = document.getElementById('habitacion');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— Seleccionar habitación —</option>';
+    for (let i = 1; i <= 20; i++) {
+      const opt  = document.createElement('option');
+      opt.value  = String(i);
+      opt.textContent = ocupadas.has(String(i)) ? `Hab. ${i}  — OCUPADA` : `Hab. ${i}`;
+      if (ocupadas.has(String(i))) opt.style.color = '#e53e3e';
+      sel.appendChild(opt);
+    }
+    if (prev) sel.value = prev;
   }
 
   function buscarFechaIngreso(m) {
