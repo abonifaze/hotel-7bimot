@@ -578,7 +578,7 @@
         <div class="form-group">
           <label>Rol *</label>
           <select id="uRol">
-            <option value="empleado">Empleado</option>
+            <option value="empleado">Recepcionista</option>
             <option value="admin">Administrador</option>
           </select>
         </div>
@@ -693,7 +693,7 @@
   /* ─── INIT NAV ─── */
   document.getElementById('navNombre').textContent = usuario?.nombre || '';
   const rolEl = document.getElementById('navRol');
-  rolEl.textContent = (usuario?.rol || '').toUpperCase();
+  rolEl.textContent = esAdmin ? 'ADMIN' : 'RECEPCIONISTA';
   rolEl.className   = 'role-badge ' + (esAdmin ? 'admin' : 'empleado');
 
   if (esAdmin) {
@@ -972,7 +972,7 @@
         <td>${i + 1}</td>
         <td><strong>${esc(u.nombre)}</strong></td>
         <td>${esc(u.usuario)}</td>
-        <td><span class="badge-rol badge-${u.rol}">${u.rol.toUpperCase()}</span></td>
+        <td><span class="badge-rol badge-${u.rol}">${u.rol === 'empleado' ? 'RECEPCIONISTA' : u.rol.toUpperCase()}</span></td>
         <td><span class="badge-rol ${u.activo ? 'badge-activo' : 'badge-inactivo'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
         <td><small style="color:#718096">${formatFecha(u.created_at)}</small></td>
         <td style="display:flex;gap:6px;flex-wrap:wrap">
