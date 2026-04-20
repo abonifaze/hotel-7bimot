@@ -485,7 +485,7 @@
         </div>
         <div class="form-group">
           <label>Fecha y Hora</label>
-          <input type="datetime-local" id="fechaHora" />
+          <input type="datetime-local" id="fechaHora" oninput="calcularMonto()" />
         </div>
         <div class="form-group">
           <label>Tipo de Pago</label>
@@ -496,9 +496,18 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Monto ($)</label>
+          <label>Tarifa por Noche ($)</label>
+          <input type="number" id="tarifa" placeholder="0.00" min="0" step="0.01" oninput="calcularMonto()" />
+        </div>
+        <div class="form-group">
+          <label>Noches</label>
+          <input type="text" id="nochesDisplay" readonly placeholder="—" style="background:#f0f4f8;font-weight:700;color:#2d3748;" />
+        </div>
+        <div class="form-group">
+          <label>Monto Total ($)</label>
           <input type="number" id="monto" placeholder="0.00" min="0" step="0.01" />
         </div>
+        <input type="hidden" id="fechaIngreso" />
         <div class="form-group" style="grid-column: 1 / -1;">
           <label>Observaciones</label>
           <input type="text" id="observacion" placeholder="Notas adicionales..." />
@@ -875,13 +884,33 @@
   }
 
   function limpiarForm() {
-    ['nombre','cedula','habitacion','monto','observacion'].forEach(id => {
+    ['nombre','cedula','habitacion','tarifa','monto','observacion','fechaIngreso','nochesDisplay'].forEach(id => {
       document.getElementById(id).value = '';
     });
     document.getElementById('pago').value = 'Efectivo';
     setFechaActual();
     document.getElementById('bannerSeleccion').classList.remove('show');
     document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
+  }
+
+  function calcularMonto() {
+    const fi     = document.getElementById('fechaIngreso').value;
+    const fs     = document.getElementById('fechaHora').value;
+    const tarifa = parseFloat(document.getElementById('tarifa').value) || 0;
+    if (!fi || !fs || tarifa <= 0) {
+      document.getElementById('nochesDisplay').value = '';
+      return;
+    }
+    const entrada = new Date(fi);
+    const salida  = new Date(fs);
+    const diffMs  = salida - entrada;
+    if (diffMs <= 0) {
+      document.getElementById('nochesDisplay').value = 'Fecha inválida';
+      return;
+    }
+    const noches = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    document.getElementById('nochesDisplay').value = noches + (noches === 1 ? ' noche' : ' noches');
+    document.getElementById('monto').value = (noches * tarifa).toFixed(2);
   }
 
   function seleccionarFila(id) {
@@ -892,12 +921,15 @@
     document.getElementById('cedula').value     = m.cedula;
     document.getElementById('habitacion').value = m.habitacion;
     document.getElementById('pago').value       = m.tipo_pago;
-    document.getElementById('monto').value      = '';
+    document.getElementById('monto').value       = '';
     document.getElementById('observacion').value = '';
+    document.getElementById('fechaIngreso').value = m.tipo === 'Ingreso' ? (m.fecha_hora || '') : '';
     setFechaActual();
+    calcularMonto();
 
+    const fechaStr = m.tipo === 'Ingreso' ? `  —  Ingreso: ${formatFecha(m.fecha_hora)}` : '';
     document.getElementById('bannerTexto').textContent =
-      `${m.nombre_huesped}  —  Hab. ${m.habitacion}  —  Cédula: ${m.cedula}`;
+      `${m.nombre_huesped}  —  Hab. ${m.habitacion}  —  Cédula: ${m.cedula}${fechaStr}`;
     document.getElementById('bannerSeleccion').classList.add('show');
 
     document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
