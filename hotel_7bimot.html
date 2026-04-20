@@ -319,6 +319,59 @@
     /* ── LOADING ── */
     .loading { opacity: 0.5; pointer-events: none; }
 
+    /* ── REPORTES ── */
+    .rep-filtros {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .btn-periodo {
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: #fef3c7;
+      color: #b7791f;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-periodo:hover   { background: #fde68a; }
+    .btn-periodo.activo  { background: #f6c90e; color: #1a202c; }
+    .rep-sep { color: #cbd5e0; font-size: 1.2rem; margin: 0 4px; }
+    .rep-fecha-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .rep-fecha-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #4a5568;
+    }
+    .rep-fecha-group input[type="date"] {
+      padding: 7px 10px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: #f7fafc;
+      color: #2d3748;
+      cursor: pointer;
+    }
+    .rep-fecha-group input[type="date"]:focus {
+      outline: none;
+      border-color: #f6c90e;
+    }
+    .stat-card.recaudado { border-color: #48bb78; }
+    .stat-card.recaudado .num { color: #276749; font-size: 1.7rem; }
+    .stat-card.promedio  { border-color: #9f7aea; }
+    .stat-card.promedio  .num { color: #6b46c1; font-size: 1.7rem; }
+    tfoot tr td { border-top: 2px solid #f6c90e; }
+    .rep-vacio { text-align:center; color:#a0aec0; padding:40px; font-size:0.95rem; }
+
     /* ── SELECCIÓN DE FILA ── */
     tbody tr.fila-clickable {
       cursor: pointer;
@@ -376,7 +429,8 @@
   <span class="nav-brand">&#127968; Residencial 7BIMOT</span>
   <div class="nav-tabs">
     <button class="nav-tab activo" id="tabMovBtn" onclick="showTab('movimientos')">&#128203; Movimientos</button>
-    <button class="nav-tab" id="tabUsrBtn"  onclick="showTab('usuarios')" style="display:none">&#128100; Usuarios</button>
+    <button class="nav-tab" id="tabRepBtn" onclick="showTab('reportes')">&#128202; Reportes</button>
+    <button class="nav-tab" id="tabUsrBtn" onclick="showTab('usuarios')" style="display:none">&#128100; Usuarios</button>
   </div>
   <div class="nav-user">
     <span class="user-nombre" id="navNombre"></span>
@@ -550,6 +604,60 @@
 
   </div><!-- /secUsuarios -->
 
+  <!-- ═══════════ TAB: REPORTES ═══════════ -->
+  <div id="secReportes" style="display:none">
+
+    <div class="form-card">
+      <h2>&#128202; Filtrar Reporte</h2>
+      <div class="rep-filtros">
+        <button class="btn-periodo activo" id="rp-hoy"    onclick="filtroPeriodo('hoy')">Hoy</button>
+        <button class="btn-periodo"        id="rp-semana" onclick="filtroPeriodo('semana')">Esta semana</button>
+        <button class="btn-periodo"        id="rp-mes"    onclick="filtroPeriodo('mes')">Este mes</button>
+        <button class="btn-periodo"        id="rp-todo"   onclick="filtroPeriodo('todo')">Todo</button>
+        <span class="rep-sep">|</span>
+        <div class="rep-fecha-group">
+          <label>Desde</label>
+          <input type="date" id="repDesde" onchange="filtroPeriodo('personalizado')" />
+          <label>Hasta</label>
+          <input type="date" id="repHasta" onchange="filtroPeriodo('personalizado')" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas resumen -->
+    <div class="stats" id="repResumen"></div>
+
+    <!-- Tabla detalle -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>&#128203; Detalle del período</h2>
+        <span id="repTituloFecha" style="font-size:0.85rem;color:#718096;font-weight:600"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Nombre</th>
+              <th>Cédula</th>
+              <th>Habitación</th>
+              <th>Fecha / Hora</th>
+              <th>Pago</th>
+              <th>Monto</th>
+              <th>Registrado por</th>
+            </tr>
+          </thead>
+          <tbody id="repCuerpo">
+            <tr><td colspan="9" class="rep-vacio">Selecciona un período para ver el reporte.</td></tr>
+          </tbody>
+          <tfoot id="repPie"></tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /secReportes -->
+
 </div>
 
 <footer>&copy; 2026 Residencial 7BIMOT &mdash; Loja, Ecuador</footer>
@@ -623,9 +731,12 @@
   function showTab(tab) {
     document.getElementById('secMovimientos').style.display = tab === 'movimientos' ? '' : 'none';
     document.getElementById('secUsuarios').style.display    = tab === 'usuarios'    ? '' : 'none';
+    document.getElementById('secReportes').style.display   = tab === 'reportes'    ? '' : 'none';
     document.getElementById('tabMovBtn').classList.toggle('activo', tab === 'movimientos');
+    document.getElementById('tabRepBtn').classList.toggle('activo', tab === 'reportes');
     document.getElementById('tabUsrBtn').classList.toggle('activo', tab === 'usuarios');
     if (tab === 'usuarios') cargarUsuarios();
+    if (tab === 'reportes') filtroPeriodo('hoy');
   }
 
   /* ─── LOGOUT ─── */
@@ -884,6 +995,125 @@
     } catch {
       toast('Error de conexión', 'err');
     }
+  }
+
+  /* ══════════ REPORTES ══════════ */
+  let repPeriodo = 'hoy';
+
+  function filtroPeriodo(periodo) {
+    repPeriodo = periodo;
+    ['hoy','semana','mes','todo'].forEach(p => {
+      const btn = document.getElementById('rp-' + p);
+      if (btn) btn.classList.toggle('activo', p === periodo);
+    });
+    if (periodo !== 'personalizado') {
+      document.getElementById('repDesde').value = '';
+      document.getElementById('repHasta').value = '';
+    }
+    generarReporte();
+  }
+
+  function generarReporte() {
+    const ahora = new Date();
+    let desde = null, hasta = null, etiqueta = '';
+
+    if (repPeriodo === 'hoy') {
+      desde = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0);
+      hasta = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 23, 59, 59);
+      etiqueta = 'Hoy: ' + desde.toLocaleDateString('es-EC');
+
+    } else if (repPeriodo === 'semana') {
+      const dia = ahora.getDay() === 0 ? 6 : ahora.getDay() - 1;
+      desde = new Date(ahora); desde.setDate(ahora.getDate() - dia); desde.setHours(0,0,0,0);
+      hasta = new Date(desde); hasta.setDate(desde.getDate() + 6); hasta.setHours(23,59,59,999);
+      etiqueta = desde.toLocaleDateString('es-EC') + ' — ' + hasta.toLocaleDateString('es-EC');
+
+    } else if (repPeriodo === 'mes') {
+      desde = new Date(ahora.getFullYear(), ahora.getMonth(), 1, 0, 0, 0);
+      hasta = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+      etiqueta = desde.toLocaleDateString('es-EC', { month: 'long', year: 'numeric' });
+
+    } else if (repPeriodo === 'todo') {
+      etiqueta = 'Todos los registros';
+
+    } else if (repPeriodo === 'personalizado') {
+      const dv = document.getElementById('repDesde').value;
+      const hv = document.getElementById('repHasta').value;
+      desde = dv ? new Date(dv + 'T00:00:00') : null;
+      hasta = hv ? new Date(hv + 'T23:59:59') : null;
+      etiqueta = (dv || '…') + ' — ' + (hv || '…');
+    }
+
+    document.getElementById('repTituloFecha').textContent = etiqueta;
+
+    const datos = movimientos.filter(m => {
+      if (!m || !m.tipo) return false;
+      const f = new Date(m.fecha_hora || m.created_at);
+      if (isNaN(f)) return true;
+      if (desde && f < desde) return false;
+      if (hasta && f > hasta) return false;
+      return true;
+    });
+
+    renderReporte(datos);
+  }
+
+  function renderReporte(datos) {
+    const ingresos  = datos.filter(m => m.tipo === 'Ingreso');
+    const salidas   = datos.filter(m => m.tipo === 'Salida');
+    const montoIng  = ingresos.reduce((s, m) => s + (parseFloat(m.monto) || 0), 0);
+    const montoSal  = salidas.reduce((s,  m) => s + (parseFloat(m.monto) || 0), 0);
+    const total     = datos.reduce((s, m) => s + (parseFloat(m.monto) || 0), 0);
+    const promedio  = datos.length ? total / datos.length : 0;
+
+    document.getElementById('repResumen').innerHTML = `
+      <div class="stat-card ingreso">
+        <div class="num">${ingresos.length}</div>
+        <div class="lbl">&#x2714; Ingresos &nbsp;<small style="font-weight:400">$${montoIng.toFixed(2)}</small></div>
+      </div>
+      <div class="stat-card salida">
+        <div class="num">${salidas.length}</div>
+        <div class="lbl">&#x2716; Salidas &nbsp;<small style="font-weight:400">$${montoSal.toFixed(2)}</small></div>
+      </div>
+      <div class="stat-card recaudado">
+        <div class="num">$${total.toFixed(2)}</div>
+        <div class="lbl">&#128176; Total Recaudado</div>
+      </div>
+      <div class="stat-card promedio">
+        <div class="num">$${promedio.toFixed(2)}</div>
+        <div class="lbl">&#128200; Promedio por Registro</div>
+      </div>`;
+
+    const tbody = document.getElementById('repCuerpo');
+    const tfoot = document.getElementById('repPie');
+
+    if (!datos.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="rep-vacio">No hay registros en este período.</td></tr>';
+      tfoot.innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = datos.map((m, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td><span class="tag tag-${m.tipo.toLowerCase()}">${esc(m.tipo)}</span></td>
+        <td><strong>${esc(m.nombre_huesped)}</strong></td>
+        <td>${esc(m.cedula)}</td>
+        <td>${esc(m.habitacion)}</td>
+        <td>${formatFecha(m.fecha_hora)}</td>
+        <td>${esc(m.tipo_pago)}</td>
+        <td style="font-weight:600;color:#276749">$${parseFloat(m.monto || 0).toFixed(2)}</td>
+        <td><small style="color:#718096">${esc(m.registrado_por) || '—'}</small></td>
+      </tr>`).join('');
+
+    tfoot.innerHTML = `
+      <tr style="background:#fef3c7">
+        <td colspan="7" style="padding:12px 14px;text-align:right;font-weight:700;color:#b7791f;font-size:0.9rem">
+          TOTAL RECAUDADO (${datos.length} registro${datos.length !== 1 ? 's' : ''})
+        </td>
+        <td style="padding:12px 14px;font-weight:800;color:#276749;font-size:1.1rem">$${total.toFixed(2)}</td>
+        <td></td>
+      </tr>`;
   }
 
   /* ─── ARRANQUE ─── */
