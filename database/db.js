@@ -3,7 +3,9 @@ const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'hotel7bimot.db');
+const DB_PATH = process.env.DB_PATH
+  ? path.join(process.env.DB_PATH, 'hotel7bimot.db')
+  : path.join(__dirname, 'hotel7bimot.db');
 let _db = null;
 
 function save() {

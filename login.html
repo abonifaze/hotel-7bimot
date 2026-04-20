@@ -31,16 +31,19 @@
     }
 
     .logo-circle {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #f6c90e, #f6ad55);
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
       margin: 0 auto 16px;
-      box-shadow: 0 4px 20px rgba(246,201,14,0.4);
+    }
+    .logo-circle img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
     }
 
     .hotel-name {
@@ -194,7 +197,7 @@
 
 <div class="card">
   <div class="hotel-header">
-    <div class="logo-circle">&#127968;</div>
+    <div class="logo-circle"><img src="/logo.png" alt="Brigada de Infantería No. 7" /></div>
     <div class="hotel-name">Residencial 7BIMOT</div>
     <div class="hotel-sub">Sistema de Gestión &mdash; Loja, Ecuador</div>
   </div>
