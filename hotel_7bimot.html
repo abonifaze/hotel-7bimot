@@ -654,6 +654,7 @@
               <th>Nombre</th>
               <th>Cédula</th>
               <th>Habitación</th>
+              <th>F. Ingreso</th>
               <th>Fecha / Hora</th>
               <th>Pago</th>
               <th>Monto</th>
@@ -661,7 +662,7 @@
             </tr>
           </thead>
           <tbody id="repCuerpo">
-            <tr><td colspan="9" class="rep-vacio">Selecciona un período para ver el reporte.</td></tr>
+            <tr><td colspan="10" class="rep-vacio">Selecciona un período para ver el reporte.</td></tr>
           </tbody>
           <tfoot id="repPie"></tfoot>
         </table>
@@ -891,6 +892,15 @@
     setFechaActual();
     document.getElementById('bannerSeleccion').classList.remove('show');
     document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
+  }
+
+  function buscarFechaIngreso(m) {
+    if (m.tipo === 'Ingreso') return m.fecha_hora;
+    const fSalida = new Date(m.fecha_hora);
+    const match = movimientos
+      .filter(x => x.tipo === 'Ingreso' && x.cedula === m.cedula && new Date(x.fecha_hora) <= fSalida)
+      .sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora))[0];
+    return match ? match.fecha_hora : null;
   }
 
   function calcularMonto() {
@@ -1127,15 +1137,19 @@
     const tfoot = document.getElementById('repPie');
 
     if (!datos.length) {
-      tbody.innerHTML = '<tr><td colspan="9" class="rep-vacio">No hay registros en este período.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="rep-vacio">No hay registros en este período.</td></tr>';
       tfoot.innerHTML = '';
       return;
     }
 
     tbody.innerHTML = datos.map((m, i) => {
-      const esSalida = m.tipo === 'Salida';
-      const montoCell = esSalida
+      const esSalida    = m.tipo === 'Salida';
+      const fIngreso    = buscarFechaIngreso(m);
+      const montoCell   = esSalida
         ? `<td style="font-weight:700;color:#276749">$${parseFloat(m.monto || 0).toFixed(2)}</td>`
+        : `<td style="color:#a0aec0;font-size:0.85rem">—</td>`;
+      const fIngresoCell = fIngreso
+        ? `<td style="font-size:0.82rem;color:#2b6cb0">${formatFecha(fIngreso)}</td>`
         : `<td style="color:#a0aec0;font-size:0.85rem">—</td>`;
       return `
       <tr>
@@ -1144,6 +1158,7 @@
         <td><strong>${esc(m.nombre_huesped)}</strong></td>
         <td>${esc(m.cedula)}</td>
         <td>${esc(m.habitacion)}</td>
+        ${fIngresoCell}
         <td>${formatFecha(m.fecha_hora)}</td>
         <td>${esc(m.tipo_pago)}</td>
         ${montoCell}
@@ -1153,7 +1168,7 @@
 
     tfoot.innerHTML = `
       <tr style="background:#fef3c7">
-        <td colspan="7" style="padding:12px 14px;text-align:right;font-weight:700;color:#b7791f;font-size:0.9rem">
+        <td colspan="8" style="padding:12px 14px;text-align:right;font-weight:700;color:#b7791f;font-size:0.9rem">
           TOTAL RECAUDADO (${salidas.length} salida${salidas.length !== 1 ? 's' : ''} cobradas)
         </td>
         <td style="padding:12px 14px;font-weight:800;color:#276749;font-size:1.1rem">$${montoSal.toFixed(2)}</td>
@@ -1177,10 +1192,14 @@
     const fechaGen = new Date().toLocaleDateString('es-EC', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
 
     const filas = datos.map((m, i) => {
-      const esSalida = m.tipo === 'Salida';
+      const esSalida  = m.tipo === 'Salida';
       const montoCell = esSalida
         ? `<td class="monto">$${parseFloat(m.monto||0).toFixed(2)}</td>`
         : `<td style="color:#a0aec0;text-align:right;font-size:10px">—</td>`;
+      const fi = buscarFechaIngreso(m);
+      const fIngCell = fi
+        ? `<td style="color:#2b6cb0">${formatFecha(fi)}</td>`
+        : `<td style="color:#a0aec0">—</td>`;
       return `
       <tr class="${i % 2 === 0 ? 'par' : ''}">
         <td>${i + 1}</td>
@@ -1188,6 +1207,7 @@
         <td><strong>${m.nombre_huesped||''}</strong></td>
         <td>${m.cedula||''}</td>
         <td>${m.habitacion||''}</td>
+        ${fIngCell}
         <td>${formatFecha(m.fecha_hora)}</td>
         <td>${m.tipo_pago||''}</td>
         ${montoCell}
@@ -1259,10 +1279,10 @@
   <div class="stat pro"><div class="num">$${promedio.toFixed(2)}</div><div class="lbl">📊 PROMEDIO</div><div class="sub">por salida</div></div>
 </div>
 <table>
-  <thead><tr><th>#</th><th>Tipo</th><th>Nombre del Huésped</th><th>Cédula/Pasaporte</th><th>Hab.</th><th>Fecha / Hora</th><th>Pago</th><th>Monto</th></tr></thead>
+  <thead><tr><th>#</th><th>Tipo</th><th>Nombre del Huésped</th><th>Cédula/Pasaporte</th><th>Hab.</th><th>F. Ingreso</th><th>Fecha / Hora</th><th>Pago</th><th>Monto</th></tr></thead>
   <tbody>${filas}</tbody>
   <tfoot><tr>
-    <td colspan="7" style="text-align:right">TOTAL RECAUDADO (${salidas.length} salida${salidas.length!==1?'s':''} cobradas)</td>
+    <td colspan="8" style="text-align:right">TOTAL RECAUDADO (${salidas.length} salida${salidas.length!==1?'s':''} cobradas)</td>
     <td class="tot-monto">$${montoSal.toFixed(2)}</td>
   </tr></tfoot>
 </table>
