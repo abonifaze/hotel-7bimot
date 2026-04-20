@@ -319,6 +319,42 @@
     /* ── LOADING ── */
     .loading { opacity: 0.5; pointer-events: none; }
 
+    /* ── SELECCIÓN DE FILA ── */
+    tbody tr.fila-clickable {
+      cursor: pointer;
+    }
+    tbody tr.fila-clickable:hover {
+      background: #e6ffed !important;
+    }
+    tbody tr.fila-seleccionada {
+      background: #ebf8ff !important;
+      border-left: 4px solid #4299e1;
+    }
+    .icono-seleccionar {
+      font-size: 0.78rem;
+      color: #a0aec0;
+      margin-left: 4px;
+    }
+    tr.fila-clickable:hover .icono-seleccionar { color: #48bb78; }
+
+    /* ── BANNER SELECCIÓN ── */
+    .banner-seleccion {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #ebf8ff;
+      border: 1.5px solid #90cdf4;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 18px;
+      font-size: 0.88rem;
+      color: #2c5282;
+      flex-wrap: wrap;
+    }
+    .banner-seleccion.show { display: flex; }
+    .banner-seleccion strong { color: #2b6cb0; }
+
     footer {
       text-align: center;
       padding: 24px;
@@ -373,6 +409,13 @@
     <!-- FORMULARIO -->
     <div class="form-card">
       <h2>&#128221; Registrar Movimiento</h2>
+
+      <!-- Banner: muestra el huésped cargado desde la tabla -->
+      <div class="banner-seleccion" id="bannerSeleccion">
+        <span>&#128100; Datos cargados: <strong id="bannerTexto"></strong></span>
+        <button class="btn-limpiar btn-sm" onclick="limpiarForm()">&#x2715; Limpiar</button>
+      </div>
+
       <div class="form-grid">
         <div class="form-group">
           <label>Nombre del Huésped *</label>
@@ -690,10 +733,10 @@
     }
 
     tbody.innerHTML = datos.map((m, i) => `
-      <tr>
+      <tr class="fila-clickable" data-id="${m.id}" onclick="seleccionarFila(${m.id})" title="Clic para cargar datos en el formulario">
         <td>${i + 1}</td>
         <td><span class="tag tag-${m.tipo.toLowerCase()}">${esc(m.tipo)}</span></td>
-        <td><strong>${esc(m.nombre_huesped)}</strong></td>
+        <td><strong>${esc(m.nombre_huesped)}</strong> <span class="icono-seleccionar">&#8598;</span></td>
         <td>${esc(m.cedula)}</td>
         <td>${esc(m.habitacion)}</td>
         <td>${formatFecha(m.fecha_hora)}</td>
@@ -702,7 +745,7 @@
         <td>${esc(m.observaciones) || '—'}</td>
         <td><small style="color:#718096">${esc(m.registrado_por) || '—'}</small></td>
         ${esAdmin
-          ? `<td><button class="btn-del" onclick="eliminar(${m.id})">Eliminar</button></td>`
+          ? `<td><button class="btn-del" onclick="event.stopPropagation(); eliminar(${m.id})">Eliminar</button></td>`
           : '<td style="display:none"></td>'
         }
       </tr>
@@ -715,6 +758,31 @@
     });
     document.getElementById('pago').value = 'Efectivo';
     setFechaActual();
+    document.getElementById('bannerSeleccion').classList.remove('show');
+    document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
+  }
+
+  function seleccionarFila(id) {
+    const m = movimientos.find(x => x.id === id);
+    if (!m) return;
+
+    document.getElementById('nombre').value     = m.nombre_huesped;
+    document.getElementById('cedula').value     = m.cedula;
+    document.getElementById('habitacion').value = m.habitacion;
+    document.getElementById('pago').value       = m.tipo_pago;
+    document.getElementById('monto').value      = '';
+    document.getElementById('observacion').value = '';
+    setFechaActual();
+
+    document.getElementById('bannerTexto').textContent =
+      `${m.nombre_huesped}  —  Hab. ${m.habitacion}  —  Cédula: ${m.cedula}`;
+    document.getElementById('bannerSeleccion').classList.add('show');
+
+    document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
+    const fila = document.querySelector(`tbody tr[data-id="${id}"]`);
+    if (fila) fila.classList.add('fila-seleccionada');
+
+    document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /* ══════════ USUARIOS (solo admin) ══════════ */
