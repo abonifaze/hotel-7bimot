@@ -643,10 +643,11 @@
     try {
       const res = await api('/api/movimientos');
       if (res.status === 401) { logout(); return; }
-      movimientos = await res.json();
+      const data = await res.json();
+      movimientos = Array.isArray(data) ? data : [];
       renderTabla();
-    } catch {
-      toast('Error al cargar movimientos', 'err');
+    } catch (err) {
+      console.error('cargarMovimientos:', err);
     }
   }
 
@@ -686,16 +687,20 @@
         })
       });
 
-      const data = await res.json();
-      if (!res.ok) { toast(data.error || 'Error al registrar', 'err'); return; }
+      if (!res.ok) {
+        let data = {};
+        try { data = await res.json(); } catch { /* noop */ }
+        toast(data.error || `Error ${res.status}`, 'err');
+        return;
+      }
 
       toast(`${tipo} registrado correctamente ✓`);
-      movimientos.unshift(data);
-      renderTabla();
-      cargarStats();
       limpiarForm();
-    } catch {
-      toast('Error de conexión con el servidor', 'err');
+      await cargarMovimientos();
+      cargarStats();
+    } catch (err) {
+      toast('Sin conexión al servidor — ¿está corriendo node server.js?', 'err');
+      console.error(err);
     }
   }
 
@@ -732,7 +737,9 @@
       return;
     }
 
-    tbody.innerHTML = datos.map((m, i) => `
+    tbody.innerHTML = datos.map((m, i) => {
+      if (!m || !m.tipo) return '';
+      return `
       <tr class="fila-clickable" data-id="${m.id}" onclick="seleccionarFila(${m.id})" title="Clic para cargar datos en el formulario">
         <td>${i + 1}</td>
         <td><span class="tag tag-${m.tipo.toLowerCase()}">${esc(m.tipo)}</span></td>
@@ -748,8 +755,8 @@
           ? `<td><button class="btn-del" onclick="event.stopPropagation(); eliminar(${m.id})">Eliminar</button></td>`
           : '<td style="display:none"></td>'
         }
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
 
   function limpiarForm() {
