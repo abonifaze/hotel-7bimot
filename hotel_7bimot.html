@@ -631,7 +631,10 @@
     <div class="table-card">
       <div class="table-header">
         <h2>&#128203; Detalle del período</h2>
-        <span id="repTituloFecha" style="font-size:0.85rem;color:#718096;font-weight:600"></span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span id="repTituloFecha" style="font-size:0.85rem;color:#718096;font-weight:600"></span>
+          <button class="btn-primary btn-sm" onclick="descargarPDF()" id="btnPDF">&#128196; Ver / Imprimir PDF</button>
+        </div>
       </div>
       <div style="overflow-x:auto">
         <table>
@@ -664,6 +667,7 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
 
 <script>
   /* ─── AUTH ─── */
@@ -999,6 +1003,7 @@
 
   /* ══════════ REPORTES ══════════ */
   let repPeriodo = 'hoy';
+  let repDatos   = [];
 
   function filtroPeriodo(periodo) {
     repPeriodo = periodo;
@@ -1048,7 +1053,10 @@
 
     const datos = movimientos.filter(m => {
       if (!m || !m.tipo) return false;
-      const f = new Date(m.fecha_hora || m.created_at);
+      if (!desde && !hasta) return true;
+      // Normaliza el string de fecha para comparar solo la parte de fecha local
+      const raw = (m.fecha_hora || m.created_at || '').toString().replace('T', ' ').slice(0, 16);
+      const f = new Date(raw.replace(' ', 'T'));
       if (isNaN(f)) return true;
       if (desde && f < desde) return false;
       if (hasta && f > hasta) return false;
@@ -1059,6 +1067,7 @@
   }
 
   function renderReporte(datos) {
+    repDatos = datos;
     const ingresos  = datos.filter(m => m.tipo === 'Ingreso');
     const salidas   = datos.filter(m => m.tipo === 'Salida');
     const montoIng  = ingresos.reduce((s, m) => s + (parseFloat(m.monto) || 0), 0);
@@ -1114,6 +1123,115 @@
         <td style="padding:12px 14px;font-weight:800;color:#276749;font-size:1.1rem">$${total.toFixed(2)}</td>
         <td></td>
       </tr>`;
+  }
+
+  function descargarPDF() {
+    generarReporte();
+    if (!repDatos.length) {
+      toast('No hay registros en el período seleccionado', 'err');
+      return;
+    }
+
+    const periodo  = document.getElementById('repTituloFecha').textContent || 'Reporte';
+    const datos    = repDatos;
+    const ingresos = datos.filter(m => m.tipo === 'Ingreso');
+    const salidas  = datos.filter(m => m.tipo === 'Salida');
+    const montoIng = ingresos.reduce((s, m) => s + (parseFloat(m.monto) || 0), 0);
+    const montoSal = salidas.reduce((s,  m) => s + (parseFloat(m.monto) || 0), 0);
+    const total    = datos.reduce((s,   m) => s + (parseFloat(m.monto) || 0), 0);
+    const promedio = datos.length ? total / datos.length : 0;
+    const fechaGen = new Date().toLocaleDateString('es-EC', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+    const filas = datos.map((m, i) => `
+      <tr class="${i % 2 === 0 ? 'par' : ''}">
+        <td>${i + 1}</td>
+        <td><span class="tag tag-${(m.tipo||'').toLowerCase()}">${m.tipo||''}</span></td>
+        <td><strong>${m.nombre_huesped||''}</strong></td>
+        <td>${m.cedula||''}</td>
+        <td>${m.habitacion||''}</td>
+        <td>${formatFecha(m.fecha_hora)}</td>
+        <td>${m.tipo_pago||''}</td>
+        <td class="monto">$${parseFloat(m.monto||0).toFixed(2)}</td>
+      </tr>`).join('');
+
+    const pagina = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>Reporte 7BIMOT</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;padding:20px;color:#2d3748}
+  @media print{
+    body{padding:8px}
+    .no-print{display:none!important}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  }
+  .btn-print{display:block;margin:0 auto 18px;padding:10px 32px;
+    background:#f6c90e;border:none;border-radius:8px;
+    font-size:14px;font-weight:700;cursor:pointer;color:#1a202c}
+  .encabezado{background:linear-gradient(135deg,#f6c90e,#f6ad55);
+    border-radius:10px;padding:16px;text-align:center;margin-bottom:14px}
+  .encabezado h1{font-size:20px;color:#1a202c}
+  .encabezado p{font-size:12px;color:#744210;margin-top:3px}
+  .titulo{text-align:center;margin-bottom:14px}
+  .titulo h2{font-size:15px;color:#b7791f}
+  .titulo p{font-size:12px;color:#718096;margin-top:3px}
+  .stats{display:flex;gap:8px;margin-bottom:14px}
+  .stat{flex:1;padding:10px;text-align:center;border-radius:8px}
+  .stat.ing{background:#f0fff4;border-top:3px solid #48bb78}
+  .stat.sal{background:#fff5f5;border-top:3px solid #f56565}
+  .stat.tot{background:#f0fff4;border-top:3px solid #38a169}
+  .stat.pro{background:#faf5ff;border-top:3px solid #9f7aea}
+  .stat .num{font-size:20px;font-weight:800}
+  .stat.ing .num{color:#48bb78}.stat.sal .num{color:#f56565}
+  .stat.tot .num{color:#276749}.stat.pro .num{color:#6b46c1}
+  .stat .lbl{font-size:10px;color:#718096;font-weight:700;margin-top:2px}
+  .stat .sub{font-size:11px;font-weight:700;margin-top:2px}
+  .stat.ing .sub{color:#276749}.stat.sal .sub{color:#9b2c2c}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  thead tr{background:#fef3c7}
+  thead th{padding:8px 7px;text-align:left;color:#b7791f;border-bottom:2px solid #f6c90e}
+  tbody tr.par{background:#fffde7}
+  tbody td{padding:6px 7px;border-bottom:1px solid #e2e8f0}
+  .monto{font-weight:700;color:#276749;text-align:right}
+  .tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+  .tag-ingreso{background:#c6f6d5;color:#276749}
+  .tag-salida{background:#fed7d7;color:#9b2c2c}
+  tfoot td{background:#fef3c7;padding:9px 7px;font-weight:800;
+    color:#b7791f;border-top:2px solid #f6c90e}
+  .tot-monto{color:#276749;font-size:13px;text-align:right}
+  .pie{text-align:center;color:#a0aec0;font-size:9px;margin-top:12px}
+</style></head><body>
+<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+<div class="encabezado">
+  <h1>🏨 RESIDENCIAL 7BIMOT</h1>
+  <p>Sistema de Registro de Huéspedes &mdash; Loja, Ecuador</p>
+</div>
+<div class="titulo">
+  <h2>REPORTE DE MOVIMIENTOS</h2>
+  <p>${periodo}</p>
+  <p style="font-size:10px;color:#a0aec0;margin-top:2px">Generado: ${fechaGen} &bull; Por: ${usuario.nombre}</p>
+</div>
+<div class="stats">
+  <div class="stat ing"><div class="num">${ingresos.length}</div><div class="lbl">✔ INGRESOS</div><div class="sub">$${montoIng.toFixed(2)}</div></div>
+  <div class="stat sal"><div class="num">${salidas.length}</div><div class="lbl">✖ SALIDAS</div><div class="sub">$${montoSal.toFixed(2)}</div></div>
+  <div class="stat tot"><div class="num">$${total.toFixed(2)}</div><div class="lbl">💰 TOTAL RECAUDADO</div><div class="sub">${datos.length} registros</div></div>
+  <div class="stat pro"><div class="num">$${promedio.toFixed(2)}</div><div class="lbl">📊 PROMEDIO</div><div class="sub">por registro</div></div>
+</div>
+<table>
+  <thead><tr><th>#</th><th>Tipo</th><th>Nombre del Huésped</th><th>Cédula/Pasaporte</th><th>Hab.</th><th>Fecha / Hora</th><th>Pago</th><th>Monto</th></tr></thead>
+  <tbody>${filas}</tbody>
+  <tfoot><tr>
+    <td colspan="7" style="text-align:right">TOTAL RECAUDADO (${datos.length} registro${datos.length!==1?'s':''})</td>
+    <td class="tot-monto">$${total.toFixed(2)}</td>
+  </tr></tfoot>
+</table>
+<div class="pie">Residencial 7BIMOT &mdash; Loja, Ecuador &mdash; ${fechaGen}</div>
+</body></html>`;
+
+    const ventana = window.open('', '_blank');
+    ventana.document.write(pagina);
+    ventana.document.close();
+    ventana.focus();
   }
 
   /* ─── ARRANQUE ─── */
