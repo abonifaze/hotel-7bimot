@@ -740,7 +740,24 @@
   function setFechaActual() {
     const now   = new Date();
     const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-    document.getElementById('fechaHora').value = local;
+    const campo = document.getElementById('fechaHora');
+    campo.value = local;
+    campo.min   = local;
+  }
+
+  function validarCedula(cedula) {
+    if (!/^\d{10}$/.test(cedula)) return false;
+    const prov = parseInt(cedula.slice(0, 2), 10);
+    if (prov < 1 || prov > 24) return false;
+    if (parseInt(cedula[2], 10) >= 6) return false;
+    const coef = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+    let suma = 0;
+    for (let i = 0; i < 9; i++) {
+      let r = parseInt(cedula[i], 10) * coef[i];
+      if (r >= 10) r -= 9;
+      suma += r;
+    }
+    return (10 - (suma % 10)) % 10 === parseInt(cedula[9], 10);
   }
 
   /* ─── TABS ─── */
@@ -803,6 +820,20 @@
     if (!nombre || !cedula || !habitacion) {
       toast('Completa los campos: Nombre, Cédula y Habitación', 'err');
       return;
+    }
+
+    if (/^\d{10}$/.test(cedula) && !validarCedula(cedula)) {
+      toast('La cédula ingresada no es válida', 'err');
+      return;
+    }
+
+    if (fechaHora) {
+      const ahora = new Date();
+      const seleccionada = new Date(fechaHora);
+      if (seleccionada > ahora) {
+        toast('No se puede registrar una fecha futura', 'err');
+        return;
+      }
     }
 
     if (tipo === 'Ingreso' && habitacionesOcupadas().has(habitacion)) {
