@@ -476,8 +476,8 @@
           <input type="text" id="nombre" placeholder="Ej: Juan Pérez" />
         </div>
         <div class="form-group">
-          <label>N° Cédula / Pasaporte *</label>
-          <input type="text" id="cedula" placeholder="Ej: 1102345678" />
+          <label>N° Cédula *</label>
+          <input type="text" id="cedula" placeholder="Ej: 1102345678" maxlength="10" />
         </div>
         <div class="form-group">
           <label>N° Habitación *</label>
@@ -539,7 +539,7 @@
               <th>#</th>
               <th>Tipo</th>
               <th>Nombre</th>
-              <th>Cédula/Pasaporte</th>
+              <th>Cédula</th>
               <th>Habitación</th>
               <th>Fecha / Hora</th>
               <th>Pago</th>
@@ -822,8 +822,8 @@
       return;
     }
 
-    if (/^\d{10}$/.test(cedula) && !validarCedula(cedula)) {
-      toast('La cédula ingresada no es válida', 'err');
+    if (!validarCedula(cedula)) {
+      toast('Ingresa una cédula ecuatoriana válida (10 dígitos)', 'err');
       return;
     }
 
@@ -1357,7 +1357,7 @@
   <div class="stat pro"><div class="num">$${promedio.toFixed(2)}</div><div class="lbl">📊 PROMEDIO</div><div class="sub">por salida</div></div>
 </div>
 <table>
-  <thead><tr><th>#</th><th>Tipo</th><th>Nombre del Huésped</th><th>Cédula/Pasaporte</th><th>Hab.</th><th>F. Ingreso</th><th>F. Salida</th><th>Pago</th><th>Monto</th></tr></thead>
+  <thead><tr><th>#</th><th>Tipo</th><th>Nombre del Huésped</th><th>Cédula</th><th>Hab.</th><th>F. Ingreso</th><th>F. Salida</th><th>Pago</th><th>Monto</th></tr></thead>
   <tbody>${filas}</tbody>
   <tfoot><tr>
     <td colspan="8" style="text-align:right">TOTAL RECAUDADO (${salidas.length} salida${salidas.length!==1?'s':''} cobradas)</td>
