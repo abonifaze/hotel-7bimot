@@ -499,7 +499,7 @@
         </div>
         <div class="form-group">
           <label>Tarifa por Noche ($)</label>
-          <input type="number" id="tarifa" placeholder="0.00" min="0" step="0.01" oninput="calcularMonto()" />
+          <input type="number" id="tarifa" placeholder="0.00" min="0" step="0.01" oninput="calcularMonto()" disabled style="background:#f0f4f8;cursor:not-allowed;" />
         </div>
         <div class="form-group">
           <label>Noches</label>
@@ -896,6 +896,10 @@
     ['nombre','cedula','habitacion','tarifa','monto','observacion','fechaIngreso','nochesDisplay'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    const campoTarifa = document.getElementById('tarifa');
+    campoTarifa.disabled = true;
+    campoTarifa.style.background = '#f0f4f8';
+    campoTarifa.style.cursor = 'not-allowed';
     document.getElementById('pago').value = 'Efectivo';
     setFechaActual();
     document.getElementById('bannerSeleccion').classList.remove('show');
@@ -972,6 +976,11 @@
     document.getElementById('monto').value       = '';
     document.getElementById('observacion').value = '';
     document.getElementById('fechaIngreso').value = m.tipo === 'Ingreso' ? (m.fecha_hora || '') : '';
+    const campoTarifa = document.getElementById('tarifa');
+    campoTarifa.disabled = false;
+    campoTarifa.style.background = '';
+    campoTarifa.style.cursor = '';
+    campoTarifa.focus();
     setFechaActual();
     calcularMonto();
 
