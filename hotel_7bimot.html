@@ -891,10 +891,12 @@
   }
 
   function renderTabla() {
-    const tbody = document.getElementById('tablaBody');
-    const datos = filtroActual === 'todos'
+    const tbody    = document.getElementById('tablaBody');
+    const resueltos = ingresosResueltos();
+    const base     = filtroActual === 'todos'
       ? movimientos
       : movimientos.filter(m => m.tipo === filtroActual);
+    const datos    = base.filter(m => !(m.tipo === 'Ingreso' && resueltos.has(m.id)));
 
     if (datos.length === 0) {
       tbody.innerHTML = '<tr><td colspan="11" class="empty-msg">No hay registros para mostrar.</td></tr>';
@@ -935,6 +937,19 @@
     setFechaActual();
     document.getElementById('bannerSeleccion').classList.remove('show');
     document.querySelectorAll('tbody tr.fila-seleccionada').forEach(tr => tr.classList.remove('fila-seleccionada'));
+  }
+
+  function ingresosResueltos() {
+    const salidas = movimientos.filter(m => m.tipo === 'Salida');
+    return new Set(
+      movimientos
+        .filter(m => m.tipo === 'Ingreso')
+        .filter(ing => salidas.some(sal =>
+          sal.cedula === ing.cedula &&
+          new Date(sal.fecha_hora) >= new Date(ing.fecha_hora)
+        ))
+        .map(ing => ing.id)
+    );
   }
 
   function habitacionesOcupadas() {
